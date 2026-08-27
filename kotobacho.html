@@ -1,0 +1,859 @@
+<title>言葉帳</title>
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style id="app-style">
+  :root {
+    --bg: #eef1f4;
+    --surface: #f8fafb;
+    --surface-alt: #e3e9ed;
+    --ink: #202632;
+    --muted: #5b6472;
+    --line: #d3dae0;
+    --accent: #2c4a6e;
+    --accent-ink: #ffffff;
+    --accent-soft: #dce6ef;
+    --seal: #ab3b32;
+    --seal-soft: #f3ded9;
+    --shadow: 0 1px 2px rgba(32, 38, 50, 0.06), 0 6px 20px rgba(32, 38, 50, 0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d;
+      --surface: #1b2028;
+      --surface-alt: #191d24;
+      --ink: #e7ebee;
+      --muted: #98a2ad;
+      --line: #2c333c;
+      --accent: #8fb3d9;
+      --accent-ink: #10161d;
+      --accent-soft: #22344a;
+      --seal: #e28579;
+      --seal-soft: #3a2420;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181d;
+    --surface: #1b2028;
+    --surface-alt: #191d24;
+    --ink: #e7ebee;
+    --muted: #98a2ad;
+    --line: #2c333c;
+    --accent: #8fb3d9;
+    --accent-ink: #10161d;
+    --accent-soft: #22344a;
+    --seal: #e28579;
+    --seal-soft: #3a2420;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans SC', 'Hiragino Sans', 'PingFang SC', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  ::selection { background: var(--accent-soft); }
+
+  #app {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: 236px;
+    flex: none;
+    background: var(--surface-alt);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    padding: 22px 16px;
+    gap: 22px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .seal-mark {
+    width: 34px; height: 34px; flex: none;
+    background: var(--seal);
+    color: #fff;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 18px;
+    font-weight: 700;
+    box-shadow: var(--shadow);
+  }
+  .brand-text h1 {
+    margin: 0;
+    font-family: 'Shippori Mincho', 'Noto Serif SC', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .brand-text p {
+    margin: 1px 0 0;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  nav.tabs { display: flex; flex-direction: column; gap: 4px; }
+  .tab-btn {
+    display: flex; align-items: center; gap: 10px;
+    background: transparent; border: none;
+    padding: 9px 10px;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    color: var(--ink);
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+  .tab-btn .ic { width: 18px; flex: none; opacity: 0.8; }
+  .tab-btn:hover { background: var(--surface); }
+  .tab-btn[aria-current="true"] {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .tab-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .sidebar-stat {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  .stat-count {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 1.4rem;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .status-row { display: flex; align-items: center; gap: 6px; }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--muted);
+    flex: none;
+  }
+  .status-dot.on { background: var(--accent); }
+
+  /* ---------- Main ---------- */
+  main {
+    flex: 1;
+    min-width: 0;
+    padding: 34px 44px 60px;
+  }
+  .view-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+  .view-header h2 {
+    font-family: 'Shippori Mincho', 'Noto Serif SC', serif;
+    font-size: 1.7rem;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .view-header .sub { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+  .content-wrap { max-width: 760px; }
+
+  /* ---------- List controls ---------- */
+  .list-controls {
+    display: flex; gap: 10px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .search-box {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 9px 12px 9px 34px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .search-box input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .search-box .ic {
+    position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    opacity: 0.55; pointer-events: none;
+  }
+  .sort-btn {
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+  .sort-btn:hover { border-color: var(--accent); }
+
+  /* ---------- Entry cards ---------- */
+  .entry-list { display: flex; flex-direction: column; gap: 10px; }
+  .entry-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    align-items: start;
+  }
+  .entry-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .entry-jp {
+    font-family: 'Shippori Mincho', 'Noto Serif SC', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  .entry-reading {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+  .entry-pos {
+    font-size: 0.68rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 4px;
+    padding: 1px 6px;
+    letter-spacing: 0.04em;
+  }
+  .entry-zh { font-size: 1rem; font-weight: 500; margin-top: 2px; }
+  .entry-notes { font-size: 0.83rem; color: var(--muted); margin-top: 3px; }
+  .entry-meta {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    grid-column: 1 / -1;
+    margin-top: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .entry-actions { display: flex; gap: 4px; }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+  .icon-btn:hover { background: var(--surface-alt); color: var(--ink); }
+  .icon-btn.danger { color: var(--seal); }
+  .icon-btn.danger.confirming { background: var(--seal-soft); border-color: var(--seal); }
+  .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .empty-state {
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-state .big { font-family: 'Shippori Mincho', serif; font-size: 1.1rem; color: var(--ink); margin-bottom: 6px; }
+  .empty-state button { margin-top: 14px; }
+
+  /* ---------- Form ---------- */
+  form.entry-form { display: flex; flex-direction: column; gap: 16px; max-width: 520px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 0.8rem; font-weight: 500; }
+  .field label .opt { color: var(--muted); font-weight: 400; }
+  .field input, .field textarea, .field select {
+    padding: 9px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .field input.jp-input { font-family: 'Shippori Mincho', serif; font-size: 1.1rem; }
+  .field textarea { resize: vertical; min-height: 56px; }
+  .field input:focus-visible, .field textarea:focus-visible, .field select:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+  }
+  .field .err {
+    color: var(--seal);
+    font-size: 0.76rem;
+    display: none;
+  }
+  .field.invalid input, .field.invalid textarea { border-color: var(--seal); }
+  .field.invalid .err { display: block; }
+  .form-actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.06); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .btn.ghost:hover { border-color: var(--accent); }
+
+  /* ---------- Help ---------- */
+  .help-section { margin-bottom: 26px; }
+  .help-section h3 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.05rem;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .help-section h3::before {
+    content: "";
+    width: 4px; height: 16px;
+    background: var(--seal);
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .help-section p, .help-section li { color: var(--ink); font-size: 0.9rem; }
+  .help-section ol, .help-section ul { margin: 6px 0; padding-left: 20px; }
+  .kbd {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface-alt);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.78rem;
+  }
+
+  /* ---------- Toast ---------- */
+  #toast {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+    z-index: 20;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    #toast { transition: none; }
+  }
+
+  @media (max-width: 720px) {
+    #app { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: static; flex-direction: row; align-items: center; }
+    .sidebar-stat { margin-top: 0; margin-left: auto; border-top: none; padding-top: 0; }
+    nav.tabs { flex-direction: row; }
+    main { padding: 24px 18px 40px; }
+  }
+</style>
+<div id="app"></div>
+<script id="entries-json" type="application/json">[{"id":"seed-1","jp":"ありがとう","reading":"ありがとう","zh":"谢谢","pos":"","notes":"日常寒暄用语,郑重说法为「ありがとうございます」。","createdAt":"2026-08-20T09:12:00.000Z"},{"id":"seed-2","jp":"猫","reading":"ねこ","zh":"猫","pos":"名","notes":"","createdAt":"2026-08-22T03:40:00.000Z"},{"id":"seed-3","jp":"食べる","reading":"たべる","zh":"吃","pos":"动","notes":"一段动词(下一段活用)。","createdAt":"2026-08-24T11:05:00.000Z"},{"id":"seed-4","jp":"美味しい","reading":"おいしい","zh":"好吃;美味的","pos":"形","notes":"","createdAt":"2026-08-26T07:50:00.000Z"},{"id":"seed-5","jp":"頑張って","reading":"がんばって","zh":"加油","pos":"","notes":"「頑張る」的て形,用于鼓励对方。","createdAt":"2026-08-27T14:30:00.000Z"}]</script>
+<script id="app-script">
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "kotobacho-entries-v1";
+
+  function readEmbeddedEntries() {
+    try {
+      var raw = document.getElementById("entries-json").textContent;
+      return JSON.parse(raw || "[]");
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function readLocalEntries() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveLocalEntries(entries) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    } catch (e) { /* storage unavailable — silently skip */ }
+  }
+
+  var state = {
+    entries: readLocalEntries() || readEmbeddedEntries(),
+    view: "list",
+    query: "",
+    sort: "recent",
+    editingId: null,
+    pendingDelete: null
+  };
+
+  var mode = "local"; // becomes "artifact" once the capability resolves
+  var artifactApi = null;
+
+  // ---------- helpers ----------
+
+  function escapeHtml(str) {
+    return String(str == null ? "" : str).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function genId() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "e-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
+
+  function formatDate(iso) {
+    try {
+      var d = new Date(iso);
+      var y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
+      return y + "-" + m + "-" + day;
+    } catch (e) { return ""; }
+  }
+
+  var collator = (window.Intl && Intl.Collator) ? new Intl.Collator("ja") : null;
+
+  function sortedFilteredEntries() {
+    var q = state.query.trim().toLowerCase();
+    var list = state.entries.filter(function (e) {
+      if (!q) return true;
+      return [e.jp, e.reading, e.zh, e.notes].some(function (f) {
+        return (f || "").toLowerCase().indexOf(q) !== -1;
+      });
+    });
+    list = list.slice();
+    if (state.sort === "alpha") {
+      list.sort(function (a, b) {
+        var ka = a.reading || a.jp || "", kb = b.reading || b.jp || "";
+        return collator ? collator.compare(ka, kb) : ka.localeCompare(kb);
+      });
+    } else {
+      list.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+    }
+    return list;
+  }
+
+  // ---------- persistence ----------
+
+  function safeEntriesJson(entries) {
+    return JSON.stringify(entries).replace(/</g, "\\u003c");
+  }
+
+  function pageHTML(entries) {
+    var styleSrc = document.getElementById("app-style").textContent;
+    var scriptSrc = document.getElementById("app-script").textContent;
+    var head = [
+      '<meta charset="UTF-8">',
+      '<meta name="viewport" content="width=device-width, initial-scale=1">',
+      '<meta name="color-scheme" content="light dark">',
+      "<title>言葉帳</title>",
+      '<link rel="preconnect" href="https://fonts.googleapis.com">',
+      '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+      '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">',
+      '<style id="app-style">' + styleSrc + "</style>"
+    ].join("\n");
+    var body = [
+      '<div id="app"></div>',
+      '<script id="entries-json" type="application/json">' + safeEntriesJson(entries) + "<\/script>",
+      '<script id="app-script">' + scriptSrc + "<\/script>"
+    ].join("\n");
+    return "<!doctype html>\n<html lang=\"zh\">\n<head>\n" + head + "\n</head>\n<body>\n" + body + "\n</body>\n</html>";
+  }
+
+  function setStatus(text, connected) {
+    var dot = document.getElementById("status-dot");
+    var label = document.getElementById("status-label");
+    if (dot) dot.classList.toggle("on", !!connected);
+    if (label) label.textContent = text;
+  }
+
+  function persist() {
+    saveLocalEntries(state.entries);
+    if (mode === "artifact" && artifactApi) {
+      artifactApi.publish(pageHTML(state.entries)).then(function () {
+        // a successful publish reloads this view automatically
+      }).catch(function (err) {
+        var code = err && err.code;
+        if (code === "conflict") {
+          // another version is already on its way in; nothing to do
+        } else if (code === "not_writer" || code === "not_granted" || code === "capability_disabled" || code === "not_declared" || code === "capability_removed") {
+          mode = "local";
+          setStatus("仅保存在本设备", false);
+          showToast("此词典为只读,改动仅保存在本设备浏览器中");
+        } else {
+          showToast("保存失败,请稍后重试");
+        }
+      });
+    }
+  }
+
+  if (window.claude && window.claude.use) {
+    window.claude.use("artifact").then(function (api) {
+      if (api) {
+        artifactApi = api;
+        mode = "artifact";
+        setStatus("词典已连接", true);
+      } else {
+        setStatus("仅保存在本设备", false);
+      }
+    }).catch(function () {
+      setStatus("仅保存在本设备", false);
+    });
+  } else {
+    setStatus("仅保存在本设备", false);
+  }
+
+  // ---------- toast ----------
+
+  var toastTimer = null;
+  function showToast(msg) {
+    var el = document.getElementById("toast");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2600);
+  }
+
+  // ---------- rendering ----------
+
+  function renderSidebar() {
+    var count = state.entries.length;
+    return (
+      '<aside class="sidebar">' +
+        '<div class="brand">' +
+          '<div class="seal-mark">辞</div>' +
+          '<div class="brand-text"><h1>言葉帳</h1><p>日 &rarr; 中 词典</p></div>' +
+        "</div>" +
+        '<nav class="tabs" aria-label="视图切换">' +
+          tabBtn("list", "词典", "&#128214;") +
+          tabBtn("add", "添加词条", "&#65291;") +
+          tabBtn("help", "帮助", "&#10067;") +
+        "</nav>" +
+        '<div class="sidebar-stat">' +
+          '<div><div class="stat-count">' + count + "</div>词条</div>" +
+          '<div class="status-row"><span id="status-dot" class="status-dot"></span><span id="status-label">正在连接&hellip;</span></div>' +
+        "</div>" +
+      "</aside>"
+    );
+  }
+
+  function tabBtn(id, label, glyph) {
+    var current = state.view === id;
+    return '<button class="tab-btn" data-view="' + id + '"' + (current ? ' aria-current="true"' : "") + '><span class="ic" aria-hidden="true">' + glyph + "</span>" + label + "</button>";
+  }
+
+  function renderEntryCard(e) {
+    var confirming = state.pendingDelete === e.id;
+    return (
+      '<article class="entry-card" data-id="' + e.id + '">' +
+        '<div>' +
+          '<div class="entry-head">' +
+            '<span class="entry-jp">' + escapeHtml(e.jp) + "</span>" +
+            (e.reading ? '<span class="entry-reading">〔' + escapeHtml(e.reading) + "〕</span>" : "") +
+            (e.pos ? '<span class="entry-pos">' + escapeHtml(e.pos) + "</span>" : "") +
+          "</div>" +
+          '<div class="entry-zh">' + escapeHtml(e.zh) + "</div>" +
+          (e.notes ? '<div class="entry-notes">' + escapeHtml(e.notes) + "</div>" : "") +
+        "</div>" +
+        '<div class="entry-actions">' +
+          '<button class="icon-btn" data-action="edit" data-id="' + e.id + '">编辑</button>' +
+          '<button class="icon-btn danger' + (confirming ? " confirming" : "") + '" data-action="delete" data-id="' + e.id + '">' + (confirming ? "确认删除" : "删除") + "</button>" +
+        "</div>" +
+        '<div class="entry-meta"><span>添加于 ' + formatDate(e.createdAt) + "</span></div>" +
+      "</article>"
+    );
+  }
+
+  function renderList() {
+    var list = sortedFilteredEntries();
+    var body;
+    if (state.entries.length === 0) {
+      body = '<div class="empty-state"><div class="big">词典还是空的</div>还没有任何词条,先去添加你遇到的第一个日语单词吧。' +
+        '<div><button class="btn" data-action="goto-add">添加词条</button></div></div>';
+    } else if (list.length === 0) {
+      body = '<div class="empty-state"><div class="big">没有找到匹配的词条</div>换一个关键词试试,或清空搜索框查看全部词条。</div>';
+    } else {
+      body = '<div class="entry-list">' + list.map(renderEntryCard).join("") + "</div>";
+    }
+    return (
+      '<div class="view-header"><div><h2>词典</h2><div class="sub">共收录 ' + state.entries.length + ' 个词条</div></div></div>' +
+      '<div class="content-wrap">' +
+        '<div class="list-controls">' +
+          '<div class="search-box"><span class="ic" aria-hidden="true">&#128269;</span>' +
+          '<input id="search-input" type="search" placeholder="搜索日文、假名或中文释义&#8203; (按 / 快速定位)" value="' + escapeHtml(state.query) + '" aria-label="搜索词条"></div>' +
+          '<button class="sort-btn" data-action="toggle-sort">' + (state.sort === "recent" ? "按添加时间 &darr;" : "按假名排序 A&rarr;Z") + "</button>" +
+        "</div>" +
+        body +
+      "</div>"
+    );
+  }
+
+  function field(labelText, opt, inner, errId, errMsg) {
+    return (
+      '<div class="field" id="field-' + errId + '">' +
+        "<label>" + labelText + (opt ? ' <span class="opt">(选填)</span>' : "") + "</label>" +
+        inner +
+        '<div class="err" id="err-' + errId + '">' + errMsg + "</div>" +
+      "</div>"
+    );
+  }
+
+  function renderAdd() {
+    var e = state.editingId ? state.entries.find(function (x) { return x.id === state.editingId; }) : null;
+    var v = e || { jp: "", reading: "", zh: "", pos: "", notes: "" };
+    var heading = e ? "编辑词条" : "添加词条";
+    return (
+      '<div class="view-header"><div><h2>' + heading + '</h2><div class="sub">' +
+        (e ? "修改后点击「保存修改」即可更新这条词条。" : "填写日语原词与中文释义,回车提交后可继续添加下一条。") +
+      '</div></div></div>' +
+      '<div class="content-wrap">' +
+      '<form class="entry-form" id="entry-form" novalidate>' +
+        field("日本語", false, '<input class="jp-input" type="text" id="f-jp" placeholder="例:ありがとう" value="' + escapeHtml(v.jp) + '" autocomplete="off">', "jp", "请输入日语原词") +
+        field("読み方 / 假名读音", true, '<input type="text" id="f-reading" placeholder="例:ありがとう" value="' + escapeHtml(v.reading) + '" autocomplete="off">', "reading", "") +
+        field("词性", true,
+          '<select id="f-pos">' +
+            ["", "名", "动", "形", "副", "其他"].map(function (p) {
+              return '<option value="' + p + '"' + (v.pos === p ? " selected" : "") + ">" + (p || "不指定") + "</option>";
+            }).join("") +
+          "</select>", "pos", "") +
+        field("中文释义", false, '<textarea id="f-zh" placeholder="例:谢谢" rows="2">' + escapeHtml(v.zh) + "</textarea>", "zh", "请输入中文释义") +
+        field("例句 / 备注", true, '<textarea id="f-notes" placeholder="用法、例句或其他备注" rows="2">' + escapeHtml(v.notes) + "</textarea>", "notes", "") +
+        '<div class="form-actions">' +
+          '<button type="submit" class="btn">' + (e ? "保存修改" : "添加词条") + "</button>" +
+          (e ? '<button type="button" class="btn ghost" data-action="cancel-edit">取消编辑</button>' : '<button type="reset" class="btn ghost" data-action="clear-form">清空</button>') +
+        "</div>" +
+      "</form>" +
+      "</div>"
+    );
+  }
+
+  function renderHelp() {
+    return (
+      '<div class="view-header"><div><h2>帮助</h2><div class="sub">关于「言葉帳」的使用说明</div></div></div>' +
+      '<div class="content-wrap">' +
+        '<div class="help-section"><h3>关于本应用</h3>' +
+          "<p>「言葉帳」是一本由你亲手建立的日语&rarr;中文词典。遇到不认识的日语单词时随手记下,应用会把所有词条整理成列表,方便日后查阅、搜索与复习。</p></div>" +
+
+        '<div class="help-section"><h3>如何添加词条</h3>' +
+          "<ol>" +
+            "<li>点击左侧「添加词条」。</li>" +
+            "<li>填写「日本語」(必填,如 ありがとう)与「中文释义」(必填,如 谢谢)。</li>" +
+            "<li>「読み方」「词性」「例句/备注」均为选填,用于补充读音、词性或用法说明。</li>" +
+            "<li>点击「添加词条」保存;表单会自动清空,方便连续输入下一条。</li>" +
+          "</ol></div>" +
+
+        '<div class="help-section"><h3>如何查看与搜索</h3>' +
+          "<ul>" +
+            "<li>点击「词典」查看全部词条,默认按添加时间排列,点击排序按钮可切换为按假名读音排序。</li>" +
+            "<li>在搜索框中输入日文、假名或中文关键词即可即时筛选。</li>" +
+            '<li>按 <span class="kbd">/</span> 键可从任意页面快速跳转到搜索框。</li>' +
+          "</ul></div>" +
+
+        '<div class="help-section"><h3>如何编辑与删除</h3>' +
+          "<ul>" +
+            "<li>点击词条卡片上的「编辑」可修改内容后保存。</li>" +
+            "<li>点击「删除」会先变为「确认删除」,再次点击才会真正移除,避免误删;若不确认,几秒后会自动还原。</li>" +
+          "</ul></div>" +
+
+        '<div class="help-section"><h3>数据如何保存</h3>' +
+          "<p>左下角的状态指示会告诉你当前的保存方式:</p>" +
+          "<ul>" +
+            "<li><strong>词典已连接</strong>&mdash;&mdash;所有添加、编辑、删除都会保存到这本词典本身,任何打开这个页面的人看到的都是同一份内容。</li>" +
+            "<li><strong>仅保存在本设备</strong>&mdash;&mdash;改动只写入这台设备这个浏览器的本地存储,不会同步给其他人;清除浏览器数据会导致词条丢失,请留意。</li>" +
+          "</ul></div>" +
+      "</div>"
+    );
+  }
+
+  function renderApp() {
+    var main;
+    if (state.view === "add") main = renderAdd();
+    else if (state.view === "help") main = renderHelp();
+    else main = renderList();
+
+    document.getElementById("app").innerHTML =
+      renderSidebar() +
+      "<main>" + main + "</main>" +
+      '<div id="toast" role="status" aria-live="polite"></div>';
+
+    setStatus(mode === "artifact" ? "词典已连接" : "仅保存在本设备", mode === "artifact");
+    bindEvents();
+  }
+
+  // ---------- events ----------
+
+  function switchView(view) {
+    state.view = view;
+    if (view !== "add") state.editingId = null;
+    renderApp();
+    if (view === "list") {
+      var input = document.getElementById("search-input");
+      if (input && state.query) input.focus();
+    } else if (view === "add") {
+      var jp = document.getElementById("f-jp");
+      if (jp) jp.focus();
+    }
+  }
+
+  function bindEvents() {
+    var app = document.getElementById("app");
+
+    app.querySelectorAll(".tab-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () { switchView(btn.dataset.view); });
+    });
+
+    var searchInput = document.getElementById("search-input");
+    if (searchInput) {
+      searchInput.addEventListener("input", function () {
+        state.query = searchInput.value;
+        var caret = searchInput.selectionStart;
+        renderApp();
+        var again = document.getElementById("search-input");
+        if (again) { again.focus(); again.setSelectionRange(caret, caret); }
+      });
+    }
+
+    var sortBtn = app.querySelector('[data-action="toggle-sort"]');
+    if (sortBtn) {
+      sortBtn.addEventListener("click", function () {
+        state.sort = state.sort === "recent" ? "alpha" : "recent";
+        renderApp();
+      });
+    }
+
+    var gotoAdd = app.querySelector('[data-action="goto-add"]');
+    if (gotoAdd) gotoAdd.addEventListener("click", function () { switchView("add"); });
+
+    app.querySelectorAll('[data-action="edit"]').forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        state.editingId = btn.dataset.id;
+        switchView("add");
+      });
+    });
+
+    app.querySelectorAll('[data-action="delete"]').forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.dataset.id;
+        if (state.pendingDelete === id) {
+          var entry = state.entries.find(function (x) { return x.id === id; });
+          state.entries = state.entries.filter(function (x) { return x.id !== id; });
+          state.pendingDelete = null;
+          renderApp();
+          persist();
+          showToast(entry ? "已删除「" + entry.jp + "」" : "已删除");
+        } else {
+          state.pendingDelete = id;
+          renderApp();
+          setTimeout(function () {
+            if (state.pendingDelete === id) { state.pendingDelete = null; renderApp(); }
+          }, 3000);
+        }
+      });
+    });
+
+    var cancelEdit = app.querySelector('[data-action="cancel-edit"]');
+    if (cancelEdit) cancelEdit.addEventListener("click", function () { state.editingId = null; switchView("list"); });
+
+    var form = document.getElementById("entry-form");
+    if (form) {
+      form.addEventListener("submit", function (evt) {
+        evt.preventDefault();
+        var jp = document.getElementById("f-jp").value.trim();
+        var reading = document.getElementById("f-reading").value.trim();
+        var pos = document.getElementById("f-pos").value;
+        var zh = document.getElementById("f-zh").value.trim();
+        var notes = document.getElementById("f-notes").value.trim();
+
+        var valid = true;
+        toggleFieldError("jp", !jp); if (!jp) valid = false;
+        toggleFieldError("zh", !zh); if (!zh) valid = false;
+        if (!valid) return;
+
+        if (state.editingId) {
+          var e = state.entries.find(function (x) { return x.id === state.editingId; });
+          if (e) { e.jp = jp; e.reading = reading; e.pos = pos; e.zh = zh; e.notes = notes; }
+          state.editingId = null;
+          persist();
+          switchView("list");
+          showToast("已保存修改");
+        } else {
+          state.entries.push({ id: genId(), jp: jp, reading: reading, pos: pos, zh: zh, notes: notes, createdAt: new Date().toISOString() });
+          persist();
+          switchView("add");
+          showToast("已添加「" + jp + "」");
+        }
+      });
+    }
+
+    var clearBtn = app.querySelector('[data-action="clear-form"]');
+    if (clearBtn) {
+      clearBtn.addEventListener("click", function () {
+        setTimeout(function () {
+          ["jp", "zh"].forEach(function (id) { toggleFieldError(id, false); });
+        }, 0);
+      });
+    }
+  }
+
+  function toggleFieldError(id, isInvalid) {
+    var field = document.getElementById("field-" + id);
+    if (field) field.classList.toggle("invalid", isInvalid);
+  }
+
+  document.addEventListener("keydown", function (evt) {
+    if (evt.key !== "/") return;
+    var tag = (document.activeElement && document.activeElement.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    evt.preventDefault();
+    if (state.view !== "list") { switchView("list"); }
+    var input = document.getElementById("search-input");
+    if (input) input.focus();
+  });
+
+  renderApp();
+})();
+</script>
