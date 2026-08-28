@@ -457,7 +457,8 @@
     try {
       var d = new Date(iso);
       var y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
-      return y + "-" + m + "-" + day;
+      var hh = String(d.getHours()).padStart(2, "0"), mm = String(d.getMinutes()).padStart(2, "0");
+      return y + "-" + m + "-" + day + " " + hh + ":" + mm;
     } catch (e) { return ""; }
   }
 
