@@ -665,13 +665,13 @@
       '<form class="entry-form" id="entry-form" novalidate>' +
         field("日本語", false, '<input class="jp-input" type="text" id="f-jp" placeholder="例:ありがとう" value="' + escapeHtml(v.jp) + '" autocomplete="off">', "jp", "请输入日语原词") +
         field("読み方 / 假名读音", true, '<input type="text" id="f-reading" placeholder="例:ありがとう" value="' + escapeHtml(v.reading) + '" autocomplete="off">', "reading", "") +
+        field("中文释义", false, '<textarea id="f-zh" placeholder="例:谢谢" rows="2">' + escapeHtml(v.zh) + "</textarea>", "zh", "请输入中文释义") +
         field("词性", true,
           '<select id="f-pos">' +
             ["", "名", "动", "形", "副", "其他"].map(function (p) {
               return '<option value="' + p + '"' + (v.pos === p ? " selected" : "") + ">" + (p || "不指定") + "</option>";
             }).join("") +
           "</select>", "pos", "") +
-        field("中文释义", false, '<textarea id="f-zh" placeholder="例:谢谢" rows="2">' + escapeHtml(v.zh) + "</textarea>", "zh", "请输入中文释义") +
         field("例句 / 备注", true, '<textarea id="f-notes" placeholder="用法、例句或其他备注" rows="2">' + escapeHtml(v.notes) + "</textarea>", "notes", "") +
       "</form>" +
       "</div>"
