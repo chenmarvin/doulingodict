@@ -123,7 +123,7 @@
     text-align: left;
     cursor: pointer;
     color: var(--ink);
-    font-size: 0.88rem;
+    font-size: 0.76rem;
     font-weight: 500;
   }
   .tab-btn .ic { width: 18px; flex: none; opacity: 0.8; }
@@ -655,9 +655,12 @@
     var v = e || { jp: "", reading: "", zh: "", pos: "", notes: "" };
     var heading = e ? "编辑词条" : "添加词条";
     return (
-      '<div class="view-header"><div><h2>' + heading + '</h2><div class="sub">' +
-        (e ? "修改后点击「保存修改」即可更新这条词条。" : "填写日语原词与中文释义,回车提交后可继续添加下一条。") +
-      '</div></div></div>' +
+      '<div class="view-header"><div><h2>' + heading + '</h2></div>' +
+        '<div class="form-actions">' +
+          '<button type="submit" form="entry-form" class="btn">' + (e ? "保存修改" : "添加词条") + "</button>" +
+          (e ? '<button type="button" class="btn ghost" data-action="cancel-edit">取消编辑</button>' : '<button type="reset" form="entry-form" class="btn ghost" data-action="clear-form">清空</button>') +
+        "</div>" +
+      "</div>" +
       '<div class="content-wrap">' +
       '<form class="entry-form" id="entry-form" novalidate>' +
         field("日本語", false, '<input class="jp-input" type="text" id="f-jp" placeholder="例:ありがとう" value="' + escapeHtml(v.jp) + '" autocomplete="off">', "jp", "请输入日语原词") +
@@ -670,10 +673,6 @@
           "</select>", "pos", "") +
         field("中文释义", false, '<textarea id="f-zh" placeholder="例:谢谢" rows="2">' + escapeHtml(v.zh) + "</textarea>", "zh", "请输入中文释义") +
         field("例句 / 备注", true, '<textarea id="f-notes" placeholder="用法、例句或其他备注" rows="2">' + escapeHtml(v.notes) + "</textarea>", "notes", "") +
-        '<div class="form-actions">' +
-          '<button type="submit" class="btn">' + (e ? "保存修改" : "添加词条") + "</button>" +
-          (e ? '<button type="button" class="btn ghost" data-action="cancel-edit">取消编辑</button>' : '<button type="reset" class="btn ghost" data-action="clear-form">清空</button>') +
-        "</div>" +
       "</form>" +
       "</div>"
     );
