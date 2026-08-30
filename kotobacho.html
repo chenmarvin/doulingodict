@@ -743,7 +743,9 @@
     if (view === "list") {
       if (restoreScroll) window.scrollTo(0, state.savedScroll);
       var input = document.getElementById("search-input");
-      if (input && state.query) input.focus();
+      // preventScroll so focusing an off-screen input doesn't undo the
+      // scroll restore above.
+      if (input && state.query) input.focus(restoreScroll ? { preventScroll: true } : undefined);
     } else if (view === "add") {
       var jp = document.getElementById("f-jp");
       if (jp) jp.focus();
@@ -778,10 +780,19 @@
           persist();
           showToast(entry ? "已删除「" + entry.jp + "」" : "已删除");
         } else {
+          // Toggle the button in place rather than a full renderApp(): the
+          // 3s auto-revert below runs on a bare timer, unrelated to any
+          // user action, and could otherwise land mid-keystroke in the
+          // search box and re-trigger the IME composition bug.
           state.pendingDelete = id;
-          renderApp();
+          btn.classList.add("confirming");
+          btn.textContent = "确认删除";
           setTimeout(function () {
-            if (state.pendingDelete === id) { state.pendingDelete = null; renderApp(); }
+            if (state.pendingDelete === id) {
+              state.pendingDelete = null;
+              btn.classList.remove("confirming");
+              btn.textContent = "删除";
+            }
           }, 3000);
         }
       });
