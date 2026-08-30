@@ -434,7 +434,8 @@
     query: "",
     sort: "recent",
     editingId: null,
-    pendingDelete: null
+    pendingDelete: null,
+    savedScroll: 0
   };
 
   var mode = "local"; // becomes "artifact" once the capability resolves
@@ -734,10 +735,12 @@
   // ---------- events ----------
 
   function switchView(view) {
+    var restoreScroll = state.view === "add" && state.editingId && view === "list";
     state.view = view;
     if (view !== "add") state.editingId = null;
     renderApp();
     if (view === "list") {
+      if (restoreScroll) window.scrollTo(0, state.savedScroll);
       var input = document.getElementById("search-input");
       if (input && state.query) input.focus();
     } else if (view === "add") {
@@ -778,6 +781,7 @@
     app.querySelectorAll('[data-action="edit"]').forEach(function (btn) {
       btn.addEventListener("click", function () {
         state.editingId = btn.dataset.id;
+        state.savedScroll = window.scrollY;
         switchView("add");
       });
     });
@@ -803,10 +807,17 @@
     });
 
     var cancelEdit = app.querySelector('[data-action="cancel-edit"]');
-    if (cancelEdit) cancelEdit.addEventListener("click", function () { state.editingId = null; switchView("list"); });
+    if (cancelEdit) cancelEdit.addEventListener("click", function () { switchView("list"); });
 
     var form = document.getElementById("entry-form");
     if (form) {
+      form.addEventListener("keydown", function (evt) {
+        // Enter in a single-line field would otherwise implicitly submit the
+        // form; only textareas should treat Enter as a line break.
+        if (evt.key === "Enter" && evt.target.tagName !== "TEXTAREA") {
+          evt.preventDefault();
+        }
+      });
       form.addEventListener("submit", function (evt) {
         evt.preventDefault();
         var jp = document.getElementById("f-jp").value.trim();
@@ -823,7 +834,6 @@
         if (state.editingId) {
           var e = state.entries.find(function (x) { return x.id === state.editingId; });
           if (e) { e.jp = jp; e.reading = reading; e.pos = pos; e.zh = zh; e.notes = notes; }
-          state.editingId = null;
           persist();
           switchView("list");
           showToast("已保存修改");
