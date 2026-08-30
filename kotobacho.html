@@ -617,17 +617,18 @@
     );
   }
 
-  function renderList() {
+  function renderListBody() {
     var list = sortedFilteredEntries();
-    var body;
     if (state.entries.length === 0) {
-      body = '<div class="empty-state"><div class="big">词典还是空的</div>还没有任何词条,先去添加你遇到的第一个日语单词吧。' +
+      return '<div class="empty-state"><div class="big">词典还是空的</div>还没有任何词条,先去添加你遇到的第一个日语单词吧。' +
         '<div><button class="btn" data-action="goto-add">添加词条</button></div></div>';
     } else if (list.length === 0) {
-      body = '<div class="empty-state"><div class="big">没有找到匹配的词条</div>换一个关键词试试,或清空搜索框查看全部词条。</div>';
-    } else {
-      body = '<div class="entry-list">' + list.map(renderEntryCard).join("") + "</div>";
+      return '<div class="empty-state"><div class="big">没有找到匹配的词条</div>换一个关键词试试,或清空搜索框查看全部词条。</div>';
     }
+    return '<div class="entry-list">' + list.map(renderEntryCard).join("") + "</div>";
+  }
+
+  function renderList() {
     return (
       '<div class="view-header"><div><h2>词典</h2><div class="sub">共收录 ' + state.entries.length + ' 个词条</div></div></div>' +
       '<div class="content-wrap">' +
@@ -636,7 +637,7 @@
           '<input id="search-input" type="search" placeholder="搜索日文、假名或中文释义&#8203; (按 / 快速定位)" value="' + escapeHtml(state.query) + '" aria-label="搜索词条"></div>' +
           '<button class="sort-btn" data-action="toggle-sort">' + (state.sort === "recent" ? "按添加时间 &darr;" : "按假名排序 A&rarr;Z") + "</button>" +
         "</div>" +
-        body +
+        '<div id="list-body">' + renderListBody() + "</div>" +
       "</div>"
     );
   }
@@ -749,31 +750,11 @@
     }
   }
 
-  function bindEvents() {
+  // Binds the actions that live inside #list-body (edit/delete/goto-add).
+  // Called after a full renderApp() and also after an in-place list-body
+  // refresh from search input, so it never needs to touch #search-input.
+  function bindListBodyEvents() {
     var app = document.getElementById("app");
-
-    app.querySelectorAll(".tab-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () { switchView(btn.dataset.view); });
-    });
-
-    var searchInput = document.getElementById("search-input");
-    if (searchInput) {
-      searchInput.addEventListener("input", function () {
-        state.query = searchInput.value;
-        var caret = searchInput.selectionStart;
-        renderApp();
-        var again = document.getElementById("search-input");
-        if (again) { again.focus(); again.setSelectionRange(caret, caret); }
-      });
-    }
-
-    var sortBtn = app.querySelector('[data-action="toggle-sort"]');
-    if (sortBtn) {
-      sortBtn.addEventListener("click", function () {
-        state.sort = state.sort === "recent" ? "alpha" : "recent";
-        renderApp();
-      });
-    }
 
     var gotoAdd = app.querySelector('[data-action="goto-add"]');
     if (gotoAdd) gotoAdd.addEventListener("click", function () { switchView("add"); });
@@ -805,6 +786,45 @@
         }
       });
     });
+  }
+
+  function bindEvents() {
+    var app = document.getElementById("app");
+
+    app.querySelectorAll(".tab-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () { switchView(btn.dataset.view); });
+    });
+
+    var searchInput = document.getElementById("search-input");
+    if (searchInput) {
+      // Patch only #list-body on input, leaving #search-input itself in
+      // place. A full renderApp() here would tear down and recreate the
+      // input mid-keystroke, which breaks IME composition (e.g. typing
+      // Chinese/Japanese pinyin/kana) and scrambles what you're typing.
+      var refreshList = function () {
+        state.query = searchInput.value;
+        var listBody = document.getElementById("list-body");
+        if (listBody) {
+          listBody.innerHTML = renderListBody();
+          bindListBodyEvents();
+        }
+      };
+      searchInput.addEventListener("input", function (evt) {
+        if (evt.isComposing) return;
+        refreshList();
+      });
+      searchInput.addEventListener("compositionend", refreshList);
+    }
+
+    var sortBtn = app.querySelector('[data-action="toggle-sort"]');
+    if (sortBtn) {
+      sortBtn.addEventListener("click", function () {
+        state.sort = state.sort === "recent" ? "alpha" : "recent";
+        renderApp();
+      });
+    }
+
+    bindListBodyEvents();
 
     var cancelEdit = app.querySelector('[data-action="cancel-edit"]');
     if (cancelEdit) cancelEdit.addEventListener("click", function () { switchView("list"); });
