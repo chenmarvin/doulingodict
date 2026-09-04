@@ -587,12 +587,18 @@
   }
 
   function exportBackup() {
+    var stamp = new Date().toISOString().slice(0, 10);
+    var defaultName = "kotobacho-backup-" + stamp;
+    var name = window.prompt("導出檔案名稱:", defaultName);
+    if (name === null) return; // user cancelled
+    name = name.trim().replace(/[\\/]/g, "") || defaultName;
+    if (!/\.json$/i.test(name)) name += ".json";
+
     var blob = new Blob([JSON.stringify(state.entries, null, 2)], { type: "application/json" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
-    var stamp = new Date().toISOString().slice(0, 10);
     a.href = url;
-    a.download = "kotobacho-backup-" + stamp + ".json";
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     a.remove();
