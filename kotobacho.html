@@ -1059,6 +1059,15 @@
 
     var form = document.getElementById("entry-form");
     if (form) {
+      var notesField = document.getElementById("f-notes");
+      if (notesField) {
+        var autoGrowNotes = function () {
+          notesField.style.height = "auto";
+          notesField.style.height = notesField.scrollHeight + "px";
+        };
+        autoGrowNotes();
+        notesField.addEventListener("input", autoGrowNotes);
+      }
       form.addEventListener("keydown", function (evt) {
         // Enter in a single-line field would otherwise implicitly submit the
         // form; only textareas should treat Enter as a line break.
