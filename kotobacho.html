@@ -873,7 +873,7 @@
               return '<option value="' + p + '"' + (v.pos === p ? " selected" : "") + ">" + (p || "不指定") + "</option>";
             }).join("") +
           "</select>", "pos", "") +
-        field("例句 / 備註", true, '<textarea id="f-notes" placeholder="用法、例句或其他備註" rows="2">' + escapeHtml(v.notes) + "</textarea>", "notes", "") +
+        field("例句 / 備註", true, '<textarea id="f-notes" placeholder="用法、例句或其他備註" rows="6">' + escapeHtml(v.notes) + "</textarea>", "notes", "") +
       "</form>" +
       "</div>"
     );
